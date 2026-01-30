@@ -11,11 +11,16 @@ import { Plus } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
-import { workspaceSchema } from "@/app/schemas/workspace";
+import { workspaceSchema, workspaceSchemaType } from "@/app/schemas/workspace";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { orpc } from "@/lib/orpc";
+import { toast } from "sonner";
 
 export function CreateWorkspace() {
 
     const [open, setOpen] = useState(false);
+
+    const queryClient = useQueryClient();
 
     const form = useForm({
         resolver: zodResolver(workspaceSchema),
@@ -24,8 +29,25 @@ export function CreateWorkspace() {
         }
     });
 
-    function onSubmit(){
-        console.log("data");
+    const CreateWorkspaceMutation = useMutation(
+        orpc.workspace.create.mutationOptions({
+            onSuccess: (newWorkspace) => {
+                toast.success(`Workspace ${newWorkspace.workspaceName} created successfully`);
+                queryClient.invalidateQueries({
+                    queryKey: orpc.workspace.list.queryKey(),
+                });
+
+                form.reset();
+                setOpen(false);
+            },
+            onError: () => {
+                toast.error("Failed to create workspace. Please try again.");
+            }
+        })
+    )
+
+    function onSubmit(values: workspaceSchemaType){
+        CreateWorkspaceMutation.mutate(values);
     }
 
 
@@ -59,7 +81,7 @@ export function CreateWorkspace() {
                                 <FormMessage />
                             </FormItem>
                         )}/>
-                        <Button type="submit">Create Workspace</Button>
+                        <Button disabled={CreateWorkspaceMutation.isPending} type="submit">{CreateWorkspaceMutation.isPending ? "Creating..." : "Create Workspace"}</Button>
                     </form>
                 </Form>
             </DialogContent> 
