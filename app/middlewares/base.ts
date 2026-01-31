@@ -1,6 +1,6 @@
 import { os } from "@orpc/server";
-// here i have added ? to request?: Request
-export const base = os.$context<{request?: Request}>().errors({
+
+export const base = os.$context<{request: Request}>().errors({
     RATE_LIMITED: {
         message: "You have been rate limited. Please try again later.",
     },
