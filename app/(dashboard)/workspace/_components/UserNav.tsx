@@ -8,6 +8,7 @@ import { orpc } from "@/lib/orpc";
 import { LogoutLink, PortalLink } from "@kinde-oss/kinde-auth-nextjs/components";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { CreditCard, LogOut, User } from "lucide-react";
+import Image from "next/image";
 
 
 export function UserNav() {
@@ -37,11 +38,17 @@ export function UserNav() {
             >
                 <DropdownMenuLabel className="font-normal flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                     <Avatar className="relative size-8 rounded-lg">
-                        <AvatarImage 
+                        <Image
+                             src={getAvatar(user.picture, user.email!)}
+                             alt="User Image"
+                             fill
+                             className="object-cover"
+                        />
+                        {/* <AvatarImage 
                             src={getAvatar(user.picture, user.email!)} 
                             alt="User Image" 
                             className="object-cover"
-                        />
+                        /> */}
                         <AvatarFallback>
                             {user.given_name?.slice(0, 2).toUpperCase()}
                         </AvatarFallback>
