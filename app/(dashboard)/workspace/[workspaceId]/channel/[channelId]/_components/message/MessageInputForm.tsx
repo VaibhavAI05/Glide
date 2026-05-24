@@ -8,6 +8,8 @@ import { MessageComposer } from "./MessageComposer";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { orpc } from "@/lib/orpc";
 import { toast } from "sonner";
+import { useState } from "react";
+import { useAttachmentUpload } from "@/hooks/use-attachment-upload";
 
 interface iAppProps {
     channelId: string
@@ -16,6 +18,8 @@ interface iAppProps {
 
 export function MessaggeInputform({channelId}: iAppProps) {
     const queryClient = useQueryClient();
+    const [editorKey, setEditorKey] = useState(0);
+    const upload = useAttachmentUpload();
 
     const form = useForm({
         resolver: zodResolver(createMessageSchema),
@@ -31,6 +35,11 @@ export function MessaggeInputform({channelId}: iAppProps) {
                 queryClient.invalidateQueries({
                     queryKey: orpc.message.list.key()
                 })
+
+                form.reset({channelId, content: ""});
+                upload.clear();
+                setEditorKey((k) => k + 1);
+
                 return toast.success("Message created successfully");
             },
             onError: () => {
@@ -40,7 +49,10 @@ export function MessaggeInputform({channelId}: iAppProps) {
     )
 
     function onSubmit(data: createMessageSchemaType) {
-        createMessageMutation.mutate(data)
+        createMessageMutation.mutate({
+            ...data,
+            imageUrl: upload.stagedUrl ?? undefined,
+        })
     }
     return (
         <Form {...form}>
@@ -51,7 +63,7 @@ export function MessaggeInputform({channelId}: iAppProps) {
                     render={({field}) => (
                         <FormItem>
                             <FormControl>
-                                <MessageComposer value={field.value} onChange={field.onChange} onSubmit={() => onSubmit(form.getValues())}isSubmitting={createMessageMutation.isPending}/>
+                                <MessageComposer key={editorKey} value={field.value} onChange={field.onChange} onSubmit={() => onSubmit(form.getValues())}isSubmitting={createMessageMutation.isPending} upload={upload}/>
                             </FormControl>
                             <FormMessage />
                         </FormItem>
