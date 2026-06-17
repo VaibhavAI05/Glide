@@ -62,4 +62,5 @@ export const config = {
     //matcher tells Next.js which routes to run the middlware on.
     //This runs the middlware on all routes except for static assets.
     matcher: ["/((?!_next/static|_next/image|favicon.ico|/rpc).*)"],
+    // matcher: ["/((?!api/auth|_next/static|_next/image|favicon.ico|/rpc).*)"],
 }
