@@ -150,7 +150,7 @@ export function MessageList() {
         const el = scrollRef.current;
         if(!el) return;
         // el.scrollTop = el.scrollHeight;
-        bottomRef.current?.scrollIntoView({block: "end"});
+        bottomRef.current?.scrollIntoView({block: "end", behavior: "smooth"});
         // setNewMessages(false);
         setIsAtBottom(true);
     }
