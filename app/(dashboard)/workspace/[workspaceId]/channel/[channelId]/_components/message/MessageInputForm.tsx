@@ -10,16 +10,18 @@ import { orpc } from "@/lib/orpc";
 import { toast } from "sonner";
 import { useState } from "react";
 import { useAttachmentUpload } from "@/hooks/use-attachment-upload";
-import { Message } from "@/lib/generated/prisma/client";
+// import { Message } from "@/lib/generated/prisma/client";
 import { KindeUser } from "@kinde-oss/kinde-auth-nextjs";
 import { getAvatar } from "@/lib/get-avatar";
+import { MessageListItem } from "@/lib/types";
 
 interface iAppProps {
     channelId: string;
     user: KindeUser<Record<string, unknown>>; 
 }
-
-type MessagePage = {items: Message[]; nextCursor?: string}
+//changes here(added the MessageListItem instead of Message)
+// type MessagePage = {items: Message[]; nextCursor?: string}
+type MessagePage = {items: MessageListItem[]; nextCursor?: string}
 type InfiniteMessages = InfiniteData<MessagePage>
 
 export function MessageInputform({channelId, user}: iAppProps) {
@@ -49,8 +51,8 @@ export function MessageInputform({channelId, user}: iAppProps) {
                 ]);
 
                 const tempId = `optimistic-${crypto.randomUUID()}`;
-
-                const optimisticMessage: Message = {
+                //check changes (added the MessageListItem)
+                const optimisticMessage: MessageListItem = {
                     id: tempId,
                     content: data.content,
                     imageUrl: data.imageUrl ?? null,
@@ -61,6 +63,10 @@ export function MessageInputform({channelId, user}: iAppProps) {
                     authorName: user.given_name ?? "John Doe",
                     authorAvatar: getAvatar(user.picture, user.email!),
                     channelId: channelId,
+                    //check changes from here (added these three things)
+                    threadId: null,
+                    reactions: [],
+                    replyCount: 0,
                 }
 
                 queryClient.setQueryData<InfiniteMessages>(['messages.List', channelId], (old) => {
@@ -108,6 +114,9 @@ export function MessageInputform({channelId, user}: iAppProps) {
                             ...page,
                             items: page.items.map((m) => m.id === context.tempId ? {
                                 ...data,
+                                //check changes (added these two things)
+                                reactions: [],
+                                replyCount: 0,
                             }: m),
                         }))
                         
@@ -123,7 +132,7 @@ export function MessageInputform({channelId, user}: iAppProps) {
 
                 return toast.success("Message created successfully");
             },
-            //⛔⛔⛔ Attention varibalies?? or variables?? checck this 
+            
             onError: (_err, _variables, context) => {
                 if(context?.previousData) {
                     queryClient.setQueryData(
