@@ -14,6 +14,7 @@ import { toast } from "sonner"
 import { KindeUser } from "@kinde-oss/kinde-auth-nextjs"
 import { getAvatar } from "@/lib/get-avatar"
 import { MessageListItem } from "@/lib/types"
+import { useChannelRealtime } from "@/providers/ChannelRealtimeProvider"
 
 interface ThreadRepliesFormProps {
     threadId: string;
@@ -25,6 +26,7 @@ export function ThreadReplyForm({threadId, user}: ThreadRepliesFormProps) {
     const upload = useAttachmentUpload();
     const [editorKey, setEditorKey] = useState(0)
     const queryClient = useQueryClient()
+    const { send } =useChannelRealtime()
 
     const form = useForm({
         resolver: zodResolver(createMessageSchema),
@@ -111,6 +113,12 @@ export function ThreadReplyForm({threadId, user}: ThreadRepliesFormProps) {
                 form.reset({channelId, content: "", threadId})
                 upload.clear();
                 setEditorKey((k) => k + 1)
+
+                send({
+                    type: "message:replies:increment",
+                    payload: {messageId: threadId, delta: 1},
+                })
+
                 return toast.success('Message created successfully!')
             },
 
