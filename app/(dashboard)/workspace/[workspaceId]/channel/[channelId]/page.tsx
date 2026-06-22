@@ -11,6 +11,7 @@ import { KindeUser } from '@kinde-oss/kinde-auth-nextjs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ThreadSidebar } from './_components/thread/ThreadSidebar';
 import { ThreadProvider, useThread } from '@/providers/ThreadProvider';
+import { ChannelRealtimeProvider } from '@/providers/ChannelRealtimeProvider';
 
 const ChannelPageMain = () => {
     const {channelId} = useParams<{channelId: string}>()
@@ -26,37 +27,39 @@ const ChannelPageMain = () => {
         return <p>error</p>
     }
   return (
-    <div className='flex h-screen w-full'>
-        {/* Main channel area */}
-        <div className='flex flex-col flex-1 min-w-0'>
-            {/* Fixed Header */}
-            {isLoading ? (
-                <div className='flex items-center justify-between h-14 px-4 border-b'>
-                    <Skeleton className='h-6 w-40' />
-                    <div className='flex items-center space-x-2'>
-                        <Skeleton className='h-8 w-28' />
-                        <Skeleton className='h-8 w-20' />
-                        <Skeleton className='size-8' />
+    <ChannelRealtimeProvider channelId={channelId}>
+        <div className='flex h-screen w-full'>
+            {/* Main channel area */}
+            <div className='flex flex-col flex-1 min-w-0'>
+                {/* Fixed Header */}
+                {isLoading ? (
+                    <div className='flex items-center justify-between h-14 px-4 border-b'>
+                        <Skeleton className='h-6 w-40' />
+                        <div className='flex items-center space-x-2'>
+                            <Skeleton className='h-8 w-28' />
+                            <Skeleton className='h-8 w-20' />
+                            <Skeleton className='size-8' />
+                        </div>
                     </div>
+                ) : (
+                    <ChannelHeader channelName={data?.channelName} />
+                )}
+
+                {/* Scrollable messages area */}
+                <div className='flex-1 overflow-hidden mb-4'>
+                    <MessageList />
                 </div>
-            ) : (
-                <ChannelHeader channelName={data?.channelName} />
+                {/* Fixed Input */}
+                <div  className='border-t bg-background p-4'>
+                    <MessageInputform channelId={channelId} user={data?.currentUser as KindeUser<Record<string, unknown>>}/>
+                </div>
+            </div>
+
+            {isThreadOpen && (
+                <ThreadSidebar user={data?.currentUser as KindeUser<Record<string, unknown>>} />
             )}
-
-            {/* Scrollable messages area */}
-            <div className='flex-1 overflow-hidden mb-4'>
-                <MessageList />
-            </div>
-            {/* Fixed Input */}
-            <div  className='border-t bg-background p-4'>
-                <MessageInputform channelId={channelId} user={data?.currentUser as KindeUser<Record<string, unknown>>}/>
-            </div>
-        </div>
-
-        {isThreadOpen && (
-            <ThreadSidebar user={data?.currentUser as KindeUser<Record<string, unknown>>} />
-        )}
-    </div> 
+        </div> 
+    </ChannelRealtimeProvider>
   )
 }
 
