@@ -21,7 +21,7 @@ const ChannelRealtimeContext = createContext<ChannelRealtimeContextValue | null>
 export function ChannelRealtimeProvider({channelId, children} : ChannelRealtimeProviderProps) {
     const queryClient = useQueryClient()
     const socket = usePartySocket({
-        host: 'http://127.0.0.1:8787',
+        host: "https://glide-chat-realtime.vaibhavsingh98gh.workers.dev",
         room: `channel-${channelId}`,
         party: 'chat',
         onMessage(e) {
